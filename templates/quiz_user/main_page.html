@@ -1,25 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-
-<a href="{% url 'quiz_creation' %}">Создать</a>
+{% if user.is_authenticated %}
+<a href="{% url 'quiz_create' %}">Создать</a>
+{% endif %}
 <form method="get">
     <input type="text" name="creator" placeholder="Ник создателя" value="{{ request.GET.creator }}">
-    
-    <select name="sort">
-        <option value="created_at" {% if request.GET.sort == "created_at" %}selected{% endif %}>По дате</option>
-        <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>По имени</option>
-        <option value="topic" {% if request.GET.sort == "topic" %}selected{% endif %}>По теме</option>
-        <option value="creator__username" {% if request.GET.sort == "creator__username" %}selected{% endif %}>По создателю</option>
+    <select name="topic" id="topic">
+        <option value="">All Topics</option>
+        {% for code, label in quizzes.model.Topic.choices %}
+          <option value="{{ code }}" {% if selected_topic == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
     </select>
-    
     <button type="submit">Сортировать</button>
 </form>
-
+<hr>
 <ul>
     {% for quiz in quizzes %}
         <li>
             <strong>{{ quiz.title }}</strong> ({{ quiz.topic }})<br>
-            Создано: {{ quiz.creator.username }} — {{ quiz.created_at|date:"d.m.Y" }}  <a href="{% url 'quiz_detail' quiz.id %}">Подробнее</a>
+            Создано: {{ quiz.creator.username }} — {{ quiz.created_at|timesince }} ago  <a href="{% url 'quiz_detail' quiz.id %}">Подробнее</a>
         </li>
     {% empty %}
         <li>Ничего не найдено</li>

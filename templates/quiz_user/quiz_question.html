@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ quiz.title }}</h2>
+<p><strong>Вопрос {{ question_index }} из {{ total_questions }}</strong></p>
+
+<form method="post">
+    {% csrf_token %}
+    <p>{{ question.text }}</p>
+
+    {% for answer in answers %}
+        <label>
+            <input type="radio" name="answer" value="{{ answer.id }}" required>
+            {{ answer.text }}
+        </label><br>
+    {% endfor %}
+
+    <br>
+    <button type="submit">Далее</button>
+</form>
+
+{% endblock %}

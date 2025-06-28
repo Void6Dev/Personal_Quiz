@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ quiz.title }}</h1>
+    <h2>{{ quiz.title }}</h2>
+    {% if request.user == quiz.creator %}
+        <a href="{% url 'quiz_edit' quiz.id %}">✏ Редактировать</a>
+    {% endif %}
     <p><strong>Тема:</strong> {{ quiz.topic }}</p>
     <p><strong>Описание:</strong> {{ quiz.description }}</p>
-    <p><strong>Создатель:</strong> {{ quiz.creator.username }}</p>
-    <p><strong>Дата создания:</strong> {{ quiz.created_at }}</p>
 
     {% if quiz.image %}
         <img src="{{ quiz.image.url }}" alt="Quiz Image" style="max-width:300px;">
     {% endif %}
+    <p>Вопросов: {{ quiz.questions.count }}</p>
 
+    <a href="{% url 'quiz_start' quiz.id %}" class="btn btn-primary">▶ Начать викторину</a>
     <a href="{% url 'main_page' %}">← Назад на главную</a>
-
 {% endblock %}
