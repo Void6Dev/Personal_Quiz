@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Ожидание игроков</h2>
+<p>Хост: {{ session.host.username }}</p>
+<p>Викторина: {{ session.session.title }}</p>
+<p><strong>Код сессии:</strong> {{ session.code }}</p>
+
+{% if is_host %}
+  <form method="post" action="">
+    {% csrf_token %}
+    Время на вопрос: <input type="number" name="time" value="{{ session.time_per_question }}"> секунд<br>
+    Максимум игроков: <input type="number" name="limit" value="{{ session.max_players }}"><br>
+    <button type="submit">Сохранить настройки</button>
+  </form>
+{% endif %}
+
+<ul id="player-list">
+  {% for player in session.players.all %}
+    <li data-user-id="{{ player.user.id }}">
+      {{ player.user.username }}
+      {% if is_host and player.user != session.host %}
+        <button onclick="kickPlayer({{ player.user.id }})">🗑️</button>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+{% if is_host %}
+  <button id="start-btn">Начать игру</button>
+{% endif %}
+
+<script>
+    function updatePlayers() {
+    fetch("{% url 'get_session_players' session.id %}")
+        .then(res => res.json())
+        .then(data => {
+        const list = document.getElementById('player-list');
+        list.innerHTML = '';
+        data.players.forEach(player => {
+            const li = document.createElement('li');
+            li.textContent = player.username;
+            {% if is_host %}
+            if (player.id !== {{ session.host.id }}) {
+            const btn = document.createElement('button');
+            btn.textContent = '🗑️';
+            btn.onclick = () => kickPlayer(player.id);
+            li.appendChild(btn);
+            }
+            {% endif %}
+            list.appendChild(li);
+        });
+
+        if (data.started) {
+            window.location.href = "{% url 'session_play' session.id %}";
+        }
+        });
+    }
+
+    function kickPlayer(userId) {
+    fetch("{% url 'kick_player' session.id %}", {
+        method: 'POST',
+        headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'user_id=' + userId
+    }).then(() => updatePlayers());
+    }
+
+    {% if is_host %}
+    document.getElementById('start-btn').onclick = function () {
+    fetch("{% url 'session_start' session.id %}", {
+        method: 'POST',
+        headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        }
+    }).then(() => window.location.href = "{% url 'session_play' session.id %}");
+    };
+    {% endif %}
+
+    setInterval(updatePlayers, 2000);
+</script>
+{% endblock %}

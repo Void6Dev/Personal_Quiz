@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Вопрос {{ index }} / {{ total }}</h2>
+<p>{{ question.text }}</p>
+<form method="post">
+  {% csrf_token %}
+  {% for answer in answers %}
+    <label>
+      <input type="radio" name="answer_id" value="{{ answer.id }}" required>
+      {{ answer.text }}
+    </label><br>
+  {% endfor %}
+  <button type="submit">Ответить</button>
+</form>
+
+<p id="timer">Осталось времени: {{ timer }} сек</p>
+<script>
+  let time = {{ timer }};
+  const timerEl = document.getElementById('timer');
+  const countdown = setInterval(() => {
+    time--;
+    timerEl.textContent = `Осталось времени: ${time} сек`;
+    if (time <= 0) {
+      clearInterval(countdown);
+      document.querySelector('form').submit();
+    }
+  }, 1000);
+</script>
+{% endblock %}

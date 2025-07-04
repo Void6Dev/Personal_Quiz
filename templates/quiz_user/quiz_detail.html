@@ -12,6 +12,60 @@
     {% endif %}
     <p>Вопросов: {{ quiz.questions.count }}</p>
 
-    <a href="{% url 'quiz_start' quiz.id %}" class="btn btn-primary">▶ Начать викторину</a>
+    <button id="startSessionBtn">🚀 Создать сессию</button>
+    <p id="sessionResult"></p>
+    <form id="joinForm" method="post">
+        {% csrf_token %}
+        <input type="text" name="code" id="sessionCodeInput" placeholder="Введите код сессии" required>
+        <button type="submit">Присоединиться</button>
+    </form>
+    <p id="joinStatus"></p>
+    <a href="{% url 'quiz_start' quiz.id %}" class="btn btn-primary">▶ Пройти викторину</a>
+    <br>
     <a href="{% url 'main_page' %}">← Назад на главную</a>
+
+
+<script>
+document.getElementById('startSessionBtn').addEventListener('click', function() {
+    fetch("{% url 'session_create' %}", {
+        method: "POST",
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'quiz_id': '{{ quiz.id }}'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            window.location.href = data.redirect_url;
+        } else {
+            document.getElementById('sessionResult').innerText = `Ошибка: ${data.message}`;
+        }
+    });
+});
+document.getElementById('joinForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    fetch("{% url 'join_session_by_code' %}", {
+    method: "POST",
+    headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+        code: document.getElementById('sessionCodeInput').value,
+    }),
+    })
+    .then(res => res.json())
+    .then(data => {
+    if (data.status === 'ok') {
+        window.location.href = data.redirect_url;
+    } else {
+        document.getElementById('joinStatus').innerText = data.message;
+    }
+    });
+});
+</script>
 {% endblock %}
