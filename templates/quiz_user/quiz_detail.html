@@ -3,6 +3,7 @@
     <h2>{{ quiz.title }}</h2>
     {% if request.user == quiz.creator %}
         <a href="{% url 'quiz_edit' quiz.id %}">✏ Редактировать</a>
+        <a href="{% url 'quiz_delete' quiz.id %}">🗑 Удалить</a>
     {% endif %}
     <p><strong>Тема:</strong> {{ quiz.topic }}</p>
     <p><strong>Описание:</strong> {{ quiz.description }}</p>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+
+Are you sure?
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes</button>
+    <a href="{% url 'quiz_detail' quiz.id %}">No</a>
+</form>
+{% endblock %}

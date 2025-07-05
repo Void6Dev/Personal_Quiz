@@ -33,6 +33,17 @@ def quiz_detail_view(request, quiz_id):
     return render(request, 'quiz_user/quiz_detail.html', {'quiz': quiz})
 
 
+def quiz_delete_view(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    if request.user != quiz.creator:  
+        return redirect('quiz_detail', quiz_id=quiz.id)
+    
+    if request.method == 'POST':
+        quiz.delete()
+        return redirect('main_page')
+    return render(request, 'quiz_creator/quiz_delete.html', {'quiz': quiz})
+
+
 @login_required
 def quiz_start_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
@@ -92,7 +103,6 @@ def quiz_result_view(request, quiz_id):
             except Answer.DoesNotExist:
                 pass
 
-    # очистка сессии
     request.session['quiz_answers'] = {}
 
     return render(request, 'quiz_user/quiz_result.html', {
@@ -160,7 +170,3 @@ def quiz_finish_view(request, quiz_id):
 
     return redirect('quiz_detail', quiz_id=quiz.id)
 
-# <a href="{% url 'profile' %}">Профиль</a>
-#                 {% if user.account.permission == "moderator" %}
-#                     <a href="{% url 'mod_panel' %}">Модерация</a>
-#                 {% endif %}
