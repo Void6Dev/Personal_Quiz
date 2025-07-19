@@ -1,28 +1,63 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-{% if user.is_authenticated %}
-<a href="{% url 'quiz_create' %}">Создать</a>
-{% endif %}
-<form method="get">
-    <input type="text" name="creator" placeholder="Ник создателя" value="{{ request.GET.creator }}">
-    <select name="topic" id="topic">
-        <option value="">All Topics</option>
-        {% for code, label in quizzes.model.Topic.choices %}
-          <option value="{{ code }}" {% if selected_topic == code %}selected{% endif %}>{{ label }}</option>
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/main_page.css' %}">
+{% endblock %}
+
+<div class="main-container">
+    {% if user.is_authenticated %}
+        <a href="{% url 'quiz_create' %}" class="btn-create">＋ Создать викторину</a>
+    {% endif %}
+
+    <form method="get" class="filter-form">
+        <select name="topic" id="topic">
+            <option value="">Все темы</option>  
+            {% for code, label in quizzes.model.Topic.choices %}
+                <option value="{{ code }}" {% if selected_topic == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="autocomplete-wrapper">
+            <input type="text" id="creator-input" name="creator" placeholder="Ник создателя" autocomplete="off">
+            <ul id="suggestions" style="display: none"></ul>
+        </div>
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+
+    <hr class="divider">
+
+    <ul class="quiz-list">
+        {% for quiz in quizzes %}
+            <li>  
+                <a href="{% url 'quiz_detail' quiz.id %}">
+                {% if quiz.image %}
+                    <img class="card-image" src="{{ quiz.image.url }}" alt="Картинка">
+                {% else %}
+                    <img class="card-image" src="/media/quiz_images/default.png" alt="Картинка">
+                </a>
+                {% endif %}  
+                <div class="card-content">
+                    <a href="{% url 'quiz_detail' quiz.id %}" class="quiz-title">{{ quiz.title }}</a>
+                    <span class="quiz-topic">({{ quiz.topic }})</span><br>
+                    <div class="creator-time">{{ quiz.creator.username }} — {{ quiz.created_at|timesince }} назад</div><br>
+                    {% if quiz.description != "No description" %}
+                        <p class="creator-time">{{ quiz.description }}</p>
+                    {% endif %}  
+                </div>
+
+            </li>
+        {% empty %}
+            <li class="empty-message">Ничего не найдено</li>
         {% endfor %}
-    </select>
-    <button type="submit">Сортировать</button>
-</form>
-<hr>
-<ul>
-    {% for quiz in quizzes %}
-        <li>
-            <strong>{{ quiz.title }}</strong> ({{ quiz.topic }})<br>
-            Создано: {{ quiz.creator.username }} — {{ quiz.created_at|timesince }} ago  <a href="{% url 'quiz_detail' quiz.id %}">Подробнее</a>
-        </li>
-    {% empty %}
-        <li>Ничего не найдено</li>
-    {% endfor %}
-</ul>
+    </ul>
+</div>
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'js/main.js' %}"></script>
+{% endblock %}
 
 {% endblock %}

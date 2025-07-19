@@ -10,5 +10,6 @@ urlpatterns = [
     path('session/<int:session_id>/kick/', views.kick_player, name='kick_player'),
     path('session/<int:session_id>/start/', views.session_start, name='session_start'),
     path('session/<int:session_id>/play/', views.session_play, name='session_play'),
+    path('session/<int:session_id>/play/submitted', views.submit_answer_view, name='submit_answer'),
     path('session/<int:session_id>/results/', views.session_results, name='session_results'),
     ]

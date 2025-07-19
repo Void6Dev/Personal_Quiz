@@ -13,5 +13,5 @@ urlpatterns = [
     path('quiz/<int:quiz_id>/start/', views.quiz_start_view, name='quiz_start'),
     path('quiz/<int:quiz_id>/question/<int:question_index>/', views.quiz_question_view, name='quiz_question'),
     path('quiz/<int:quiz_id>/result/', views.quiz_result_view, name='quiz_result'),
-
+    path('autocomplete/', views.username_autocomplete, name='username_autocomplete'),
 ]

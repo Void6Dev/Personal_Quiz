@@ -1,11 +1,50 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<h2>Вход</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-</form>
-<a href="{% url 'register' %}">Нет аккаунта?</a>
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+<div class="auth-container">
+    <div class="auth-info">
+        <h1>С ВОЗВРАЩЕНИЕМ !</h1>
+        <p>Подсказка: для авторизации воспользуйтесь формой входа, 
+            а если у вас еще нет аккаунта воспользуйтесь ссылкой "Регистрация" над формой.
+        </p>
+    </div>
+    <div class="auth-form">
+        <div class="auth-form2">
+            <span style="color: #ffd000ff;"><h2><a href="{% url 'auth' %}">Вход</a></h2></span>
+            <h2><a href="{% url 'register' %}">Регистрация</a></h2> 
+        </div>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="input-group">
+                <div class="input-flex">
+                    <span class="icon">👤</span>
+                    {{ form.username }}
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-flex">
+                    <span class="icon">🔒</span>
+                    {{ form.password }}
+                    <span class="toggle-password" onclick="togglePassword(this)"><i class="fa-solid fa-eye"></i></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Войти</button>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}
 
 {% endblock %}

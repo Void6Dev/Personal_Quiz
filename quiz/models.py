@@ -22,7 +22,7 @@ class Quiz(models.Model):
         choices=Topic.choices,
         default=Topic.GENERAL_KNOWLEDGE,
     )
-    description = models.TextField(default="No description")
+    description = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to="quiz_images/", null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

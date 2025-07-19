@@ -1,93 +1,66 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
-<h2>Редактирование викторины: {{ quiz.title }}</h2>
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/quiz_edit.css' %}">
+{% endblock %}
 
-<h3>Добавить вопрос</h3>
-<form method="post">
-  {% csrf_token %}
-  <textarea name="question" placeholder="Вопрос" required></textarea><br><br>
+<div class="edit-container">
 
-  <div id="answers">
-    <div class="answer">
-      <input type="text" name="answer_text" placeholder="Ответ" required>
-      <input type="checkbox" name="is_correct" value="0"> Правильный
+  <h2>Редактирование викторины: {{ quiz.title }}</h2>
+
+  <h3>Добавить вопрос</h3>
+  <form method="post">
+    {% csrf_token %}
+    <textarea name="question" placeholder="Вопрос" required></textarea><br><br>
+
+    <div id="answers">
+      <div class="answer">
+        <input type="text" name="answer_text" placeholder="Ответ" required>
+        <input type="checkbox" name="is_correct" value="0"> Правильный
+      </div>
     </div>
-  </div>
 
-  <button type="button" onclick="addAnswer()"> + Добавить ответ</button>
-  <button type="button" onclick="removeLastAnswer()"> - Удалить последний ответ</button>
-  <br><br>
+    <button type="button" class="btn" onclick="addAnswer()">+ Добавить ответ</button>
+    <button type="button" class="btn" onclick="removeLastAnswer()">− Удалить последний ответ</button>
+    <button type="submit" class="btn">Сохранить</button>
+  </form>
 
-  <button type="submit">Сохранить</button>
-</form>
+  <h3>Уже добавленные вопросы</h3>
+  <hr>
+  {% for question in questions %}
+    <div class="question-block">
+      <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
+      <ul>
+        {% for answer in question.answers.all %}
+          <li>
+            {{ answer.text }} {% if answer.is_correct %}✅{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <form method="post" action="{% url 'question_delete' quiz.id question.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn">🗑 Удалить вопрос</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>Пока нет вопросов.</p>
+  {% endfor %}
 
-<hr>
+  <hr>
 
-<h3>Уже добавленные вопросы</h3>
-{% for question in questions %}
-  <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-    <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
-    <ul>
-      {% for answer in question.answers.all %}
-        <li>
-          {{ answer.text }} {% if answer.is_correct %}✅{% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-    <form method="post" action="{% url 'question_delete' quiz.id question.id %}">
-      {% csrf_token %}
-      <button type="submit">🗑 Удалить вопрос</button>
-    </form>
-  </div>
-{% empty %}
-  <p>Пока нет вопросов.</p>
-{% endfor %}
+  <form method="post" action="{% url 'quiz_finish' quiz.id %}">
+    {% csrf_token %}
+    <button type="submit" class="finish-btn">✅ Завершить создание</button>
+  </form>
 
-<hr>
+</div>
 
-<form method="post" action="{% url 'quiz_finish' quiz.id %}">
-  {% csrf_token %}
-  <button type="submit">✅ Завершить создание</button>
-</form>
-
-<script>
-  let answerCount = 1;
-  function addAnswer() {
-    const container = document.getElementById('answers');
-
-    const answerDiv = document.createElement('div');
-    answerDiv.classList.add('answer');
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = 'answer_text';
-    input.placeholder = 'Ответ';
-    input.required = true;
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.name = 'is_correct';
-    checkbox.value = answerCount;
-
-    const label = document.createElement('label');
-    label.innerText = ' Правильный';
-
-    answerDiv.appendChild(input);
-    answerDiv.appendChild(checkbox);
-    answerDiv.appendChild(label);
-
-    container.appendChild(answerDiv);
-    answerCount++;
-  }
-
-  function removeLastAnswer() {
-    const container = document.getElementById('answers');
-    if (container.children.length > 1) {
-      container.removeChild(container.lastElementChild);
-      answerCount--;
-    }
-  }
-</script>
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'js/quiz_edit.js' %}"></script>
+{% endblock %}
 
 {% endblock %}

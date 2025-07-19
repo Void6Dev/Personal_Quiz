@@ -1,9 +1,11 @@
+import random
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse    
-from .models import Session, SessionPlayer
+from .models import Session, SessionPlayer, PlayerAnswer
 from quiz.models import Question, Answer, Quiz
 
 
@@ -90,8 +92,7 @@ def session_start(request, session_id):
 
 @login_required
 def session_play(request, session_id):
-    session = get_object_or_404(Session, id=session_id)
-    player = get_object_or_404(SessionPlayer, session=session, user=request.user)
+    session = get_object_or_404(Session, id=session_id, is_active=True)
 
     questions = list(session.session.questions.all())
     total = len(questions)
@@ -102,17 +103,7 @@ def session_play(request, session_id):
 
     question = questions[question_index]
     answers = list(question.answers.all())
-    import random
     random.shuffle(answers)
-
-    if request.method == 'POST':
-        chosen_id = int(request.POST.get('answer_id'))
-        correct = Answer.objects.get(id=chosen_id).is_correct
-        if correct:
-            player.score += 1
-            player.save()
-        return redirect(f"{request.path}?q={question_index + 1}")
-
     return render(request, 'session/session_play.html', {
         'session': session,
         'quiz': session.session,
@@ -122,6 +113,49 @@ def session_play(request, session_id):
         'total': total,
         'timer': session.time_per_question,
     })
+
+
+@csrf_exempt
+@require_POST
+@login_required
+def submit_answer_view(request, session_id):
+    session_id = request.POST.get('session_id')
+    question_id = request.POST.get('question_id')
+    answer_id = request.POST.get('answer_id')
+
+    try:
+        session = Session.objects.get(id=session_id)
+        question = Question.objects.get(id=question_id)
+        answer = Answer.objects.get(id=answer_id)
+        player = request.user
+
+        if PlayerAnswer.objects.filter(session=session, player=player, question=question).exists():
+            return JsonResponse({'status': 'error', 'message': 'Вы уже ответили'})
+
+        PlayerAnswer.objects.create(
+            session=session,
+            player=player,
+            question=question,
+            answer=answer,
+            submitted_at=timezone.now()
+        )
+
+        sp = SessionPlayer.objects.get(session=session, user=player)
+
+        if answer.is_correct:
+            sp.score += 1
+            sp.save() 
+            
+            is_first = not PlayerAnswer.objects.filter(session=session, question=question).exclude(player=player).exists()
+            if is_first:
+                sp.score += 1
+                sp.save()
+
+        return JsonResponse({'status': 'ok', 'score': sp.score})
+
+    except (Session.DoesNotExist, Question.DoesNotExist, Answer.DoesNotExist):
+        return JsonResponse({'status': 'error', 'message': 'Неверные данные'})
+
 
 
 @login_required

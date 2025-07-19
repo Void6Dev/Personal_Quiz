@@ -1,7 +1,7 @@
 import string, random
 from django.db import models
 from django.contrib.auth.models import User
-from quiz.models import Quiz
+from quiz.models import Quiz, Question, Answer
 
 
 def generate_session_code(length=6):
@@ -27,4 +27,15 @@ class SessionPlayer(models.Model):
     
     class Meta:
         unique_together = ('session', 'user')
+        
+        
+class PlayerAnswer(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('session', 'player', 'question')
     

@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 from .models import Quiz, Question, Answer
 from .forms import QuizForm
-
 
 def quiz_list_view(request):
     sort_by = request.GET.get('sort', 'created_at') 
@@ -26,6 +27,18 @@ def quiz_list_view(request):
     }
 
     return render(request, 'quiz_user/main_page.html', context)
+
+
+def username_autocomplete(request):
+    query = request.GET.get('q', '')
+    usernames = []
+
+    if query:
+        usernames = list(
+            User.objects.filter(username__icontains=query)
+            .values_list('username', flat=True)[:10]
+        )
+    return JsonResponse({'results': usernames})
 
 
 def quiz_detail_view(request, quiz_id):
