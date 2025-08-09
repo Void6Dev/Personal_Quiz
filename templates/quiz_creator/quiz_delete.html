@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/quiz_delete.css' %}">
+{% endblock %}
 {% block content %}
+<div class="quiz-container">
+    Вы уверены?
 
-Are you sure?
-
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Yes</button>
-    <a href="{% url 'quiz_detail' quiz.id %}">No</a>
-</form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Да</button>
+        <a href="{% url 'quiz_detail' quiz.id %}">Нет</a>
+    </form>
+</div>
 {% endblock %}

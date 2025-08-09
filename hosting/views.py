@@ -9,6 +9,14 @@ from .models import Session, SessionPlayer, PlayerAnswer
 from quiz.models import Question, Answer, Quiz
 
 
+@login_required
+def session_list(request):
+    sort_by = request.GET.get('sort', 'created_at') 
+    host_name = request.GET.get('host')
+    quiz = request.GET.get('quiz.title')
+    
+    sessions = Session.objects.all()
+
 @csrf_exempt
 @require_POST
 @login_required

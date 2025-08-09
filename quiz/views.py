@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+
+from .forms import QuizForm, QuestionForm
 from .models import Quiz, Question, Answer
-from .forms import QuizForm
+from .formsets import AnswerFormSet
 
 def quiz_list_view(request):
     sort_by = request.GET.get('sort', 'created_at') 
@@ -97,7 +99,6 @@ def quiz_question_view(request, quiz_id, question_index):
     })
     
 
-@login_required
 def quiz_result_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
     answers_given = request.session.get('quiz_answers', {})
@@ -116,14 +117,20 @@ def quiz_result_view(request, quiz_id):
             except Answer.DoesNotExist:
                 pass
 
+    credits_earned = correct * 5
+    if credits_earned > 0:
+        account = request.user.account
+        account.credits += credits_earned
+        account.save()
+
     request.session['quiz_answers'] = {}
 
     return render(request, 'quiz_user/quiz_result.html', {
         'quiz': quiz,
         'correct': correct,
-        'total': total
+        'total': total,
+        'credits_earned': credits_earned
     })
-    
     
 @login_required
 def quiz_create_view(request):
@@ -143,25 +150,32 @@ def quiz_create_view(request):
 @login_required
 def quiz_edit_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    questions = quiz.questions.all()
 
     if request.method == 'POST':
-        question_text = request.POST.get('question')
-        answer_texts = request.POST.getlist('answer_text')
-        is_correct_indexes = request.POST.getlist('is_correct')
+        question_form = QuestionForm(request.POST, request.FILES)
+        formset = AnswerFormSet(request.POST, request.FILES, queryset=Answer.objects.none())
 
-        if question_text:
-            question = Question.objects.create(quiz=quiz, text=question_text)
-            for i, text in enumerate(answer_texts):
-                Answer.objects.create(
-                    question=question,
-                    text=text,
-                    is_correct=str(i) in is_correct_indexes
-                )
+        if question_form.is_valid() and formset.is_valid():
+            question = question_form.save(commit=False)
+            question.quiz = quiz
+            question.save()
+
+            answers = formset.save(commit=False)
+            for answer in answers:
+                answer.question = question
+                answer.save()
+            for obj in formset.deleted_objects:
+                obj.delete()
+
             return redirect('quiz_edit', quiz_id=quiz.id)
+    else:
+        question_form = QuestionForm()
+        formset = AnswerFormSet(queryset=Answer.objects.none())
 
     return render(request, 'quiz_creator/quiz_edit.html', {
         'quiz': quiz,
+        'question_form': question_form,
+        'formset': formset,
         'questions': quiz.questions.all(),
     })
 
@@ -169,10 +183,12 @@ def quiz_edit_view(request, quiz_id):
 @login_required
 def question_delete_view(request, quiz_id, question_id):
     question = get_object_or_404(Question, id=question_id, quiz_id=quiz_id)
-    question.delete()
-    return redirect('quiz_edit', quiz_id=quiz_id)
+    if request.method == 'POST':
+        question.delete()
+        return redirect('quiz_edit', quiz_id=quiz_id)
 
 
+# Не реализованно
 @login_required
 def quiz_finish_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, creator=request.user)

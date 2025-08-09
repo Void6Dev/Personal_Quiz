@@ -13,6 +13,6 @@ class Account(models.Model):
     permission = models.CharField(max_length=15, 
                                   choices=Permissions.choices, 
                                   default=Permissions.USER)
-                                
+    credits = models.PositiveIntegerField(default=0)
     def __str__(self):
         return self.user.username

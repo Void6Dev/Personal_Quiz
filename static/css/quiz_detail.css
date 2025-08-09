@@ -4,7 +4,6 @@
     align-items: center;
     justify-content: center;
     min-height: 80vh;
-
     padding: 2rem;
 }
 
@@ -12,7 +11,6 @@
     background-color: #1b1e2f;
     color: #f1f1f1;
     padding: 2rem;
-    
     border-radius: 16px;
     margin: auto;
     box-shadow: 0 0 20px rgba(28, 27, 27, 0.149);
@@ -45,10 +43,18 @@
 .quiz-container .quiz-delete {
     display: inline-block;
     margin-right: 1rem;
-    color: #ffaa00;
     text-decoration: none;
     font-weight: bold;
 }
+
+.quiz-edit {
+    color: #ffaa00;
+}
+
+.quiz-delete {
+    color: #d34333;
+}
+
 .quiz-container .quiz-edit:hover{
     color: #ffcc55;
     text-shadow: 0 0 4px #ffaa00;

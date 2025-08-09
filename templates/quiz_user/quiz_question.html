@@ -2,22 +2,59 @@
 {% load static %}
 {% block content %}
 
-<h2>{{ quiz.title }}</h2>
-<p><strong>Вопрос {{ question_index }} из {{ total_questions }}</strong></p>
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/quiz_question.css' %}">
+{% endblock %}
 
-<form method="post">
+<div class="quiz-container">
+  <h2>{{ quiz.title }}</h2>
+  <p><strong>Вопрос {{ question_index }} из {{ total_questions }}</strong></p>
+
+  <form method="post">
     {% csrf_token %}
-    <p>{{ question.text }}</p>
+    <div class="question-box">
+      {% if question.text %}
+        <p>{{ question.text }}</p>
+      {% endif %}
+      {% if question.image_url %}
+        <img src="{{ question.image_url }}" alt="Изображение к вопросу" class="question-image"/>
+      {% elif question.image %}
+        <img src="{{ question.image.url }}" alt="Изображение к вопросу" class="question-image">
+      {% endif %}
+    </div>
 
-    {% for answer in answers %}
-        <label>
+    <div class="answers">
+      {% for answer in answers %}
+        <label class="answer-option">
             <input type="radio" name="answer" value="{{ answer.id }}" required>
-            {{ answer.text }}
-        </label><br>
-    {% endfor %}
+            {% if answer.image_url %}
+              <img src="{{ answer.image_url }}" alt="Изображение к ответу" class="answer-image" />  
+            {% elif answer.image %}
+              <img src="{{ answer.image.url }}" alt="Изображение к ответу" class="answer-image" />
+            {% else %}
+              {{ answer.text }}
 
-    <br>
-    <button type="submit">Далее</button>
-</form>
+            {% endif %}
+        </label>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="submit-btn">Далее</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const options = document.querySelectorAll(".answer-option");
+
+    options.forEach(option => {
+      option.addEventListener("click", () => {
+        options.forEach(o => o.classList.remove("active"));
+        option.classList.add("active");
+      });
+    });
+  });
+</script>
 
 {% endblock %}

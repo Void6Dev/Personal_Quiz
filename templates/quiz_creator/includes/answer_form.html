@@ -1,0 +1,33 @@
+{% load form_filters %}
+
+<div class="answer-form">
+  <div class="form-row">
+    {{ form.text|add_class:"input" }}
+  </div>
+
+  <div class="form-row file-upload" style="position: relative;"> 
+    <label class="file-label">
+      {{ form.image }}
+      <span class="file-name">📎 Прикрепите изображение(необязательно)</span>
+    </label>
+    <img id="preview" style="position: absolute; top: 100%; left: 0; width: 150px; display: none; border: 1px solid #ccc; background: white;" />
+  </div>
+  <div class="form-row">
+  {{ form.image_url|add_class:"input" }}
+  </div>
+  {% if form.instance.image_url %}
+    <img src="{{ form.instance.image_url }}" alt="Image from URL" width="100">
+  {% endif %}
+
+  <div class="form-row is-correct-row">
+    <label class="form-checkbox">
+      {{ form.is_correct }}
+    </label>
+
+    
+    <button type="button" class="delete-answer" title="Удалить">
+      {{ form.DELETE.as_hidden }}
+      🗑 Удалить вопрос
+    </button>
+  </div>
+</div>

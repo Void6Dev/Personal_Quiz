@@ -7,6 +7,20 @@
     height: 100%;
 }
 
+.credits-display {
+  position: fixed;
+  top: 100px; 
+  right: 20px;
+  background: transparent;
+  box-shadow: 0px 0px 25px #44ffd1;
+  color: #f1cf26;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 1000;
+}
+
 /* Кнопка "Создать" */
 .btn-create {
     display: inline-block;

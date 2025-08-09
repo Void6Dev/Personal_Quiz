@@ -10,6 +10,9 @@
 <div class="main-container">
     {% if user.is_authenticated %}
         <a href="{% url 'quiz_create' %}" class="btn-create">＋ Создать викторину</a>
+        <span class="credits-display">
+        💰 Кредиты: {{ user.account.credits }}
+        </span>
     {% endif %}
 
     <form method="get" class="filter-form">
@@ -40,9 +43,9 @@
                 </a>
                 {% endif %}  
                 <div class="card-content">
-                    <a href="{% url 'quiz_detail' quiz.id %}" class="quiz-title">{{ quiz.title }}</a>
-                    <span class="quiz-topic">({{ quiz.topic }})</span><br>
-                    <div class="creator-time">{{ quiz.creator.username }} — {{ quiz.created_at|timesince }} назад</div><br>
+                    <a href="{% url 'quiz_detail' quiz.id %}" class="quiz-title">{{ quiz.title }}</a><span class="quiz-topic">({{ quiz.topic }})</span><br>
+                    <div class="creator-time">{{ quiz.creator.username }}</div><br>
+                    
                     {% if quiz.description != "No description" %}
                         <p class="creator-time">{{ quiz.description }}</p>
                     {% endif %}  

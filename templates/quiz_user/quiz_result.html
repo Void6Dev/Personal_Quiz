@@ -1,11 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
-<h2>Результаты викторины: {{ quiz.title }}</h2>
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/quiz_result.css' %}">
+{% endblock %}
 
-<p><strong>Правильных ответов:</strong> {{ correct }} из {{ total }}</p>
+<h2>🎯 Результаты викторины: {{ quiz.title }}</h2>
 
-<p>
+<p class="result-text"><strong>Правильных ответов:</strong> {{ correct }} из {{ total }}</p>
+<p class="result-text">
     {% if correct == total %}
         🎉 Отличный результат! Вы прошли викторину идеально!
     {% elif correct >= total|divisibleby:2 %}
@@ -13,8 +18,27 @@
     {% else %}
         👀 Попробуйте ещё раз, вы можете лучше!
     {% endif %}
+
+    {% if credits_earned > 0 %}
+        <p style="color: gold; font-size: 18px;">💰 Вы заработали {{ credits_earned }} кредитов!</p>
+    {% endif %}
 </p>
 
-<a href="{% url 'quiz_detail' quiz.id %}">← Назад к описанию викторины</a>
+<a href="{% url 'quiz_detail' quiz.id %}" class="back-link">← Назад к описанию викторины</a>
+
+
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/quiz_result.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const correct = {{ correct|default:0 }};
+    if (correct > 0) {
+    launchFireworks();
+    }
+});
+</script>
+{% endblock %}
 
 {% endblock %}

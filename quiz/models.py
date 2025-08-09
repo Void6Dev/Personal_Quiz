@@ -32,10 +32,15 @@ class Quiz(models.Model):
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(blank=True)
+    image = models.ImageField(upload_to="quiz_questions_images/", null=True, blank=True)
+    image_url = models.URLField(blank=True, null=True)
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
-    text = models.CharField(max_length=255)
+    text = models.CharField(max_length=255, blank=True)
+    image = models.ImageField(upload_to="quiz_answers_images/", null=True, blank=True)
+    image_url = models.URLField(blank=True, null=True)
     is_correct = models.BooleanField(default=False) 
+    
     

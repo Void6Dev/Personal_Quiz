@@ -16,6 +16,7 @@
             <a class="quiz-delete" href="{% url 'quiz_delete' quiz.id %}">🗑 Удалить</a>
         {% endif %}
         <hr>
+        {{ quiz.created_at|timesince }} назад
         <div class="title">
             <h2>{{ quiz.title }}</h2>
             <h3>by {{ quiz.creator }}</h3>
